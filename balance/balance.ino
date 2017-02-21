@@ -1,4 +1,18 @@
-/* fill me in later but 2/20/17 */
+//*********************************************************************************
+//*                                                                               *
+//*  Katelyn Biesiadecki                                                          *
+//*  February 20th, 2017                                                          *
+//*                                                                               *
+//*  Balance                                                                      *
+//*                                                                               *
+//*  This sketch uses an IMU to determine the current yaw of the sensor and set   *
+//*  a servo to a position so that it always points straight up.                  *
+//*                                                                               *
+//*  Inspiration for this project from the following videos...                    *
+//*  Bender is gyroscopically stable: https://www.youtube.com/watch?v=xl-0AePt0e0 *
+//*  Star Trek: https://www.youtube.com/watch?v=-t7oF6tNAJI                       *
+//*                                                                               *
+//*********************************************************************************
 
 #include <Wire.h>
 #include <Servo.h>
@@ -18,13 +32,14 @@ int PIN_POT = 0;
 void setup(void)
 {
   Serial.begin(9600);
-  Serial.println("Orientation Sensor Raw Data Test"); Serial.println("");
+  Serial.println("Orientation Sensor Raw Data"); 
+  Serial.println("");
 
-  /* Initialise the sensor */
+  // Initialize the sensor.
   if(!bno.begin())
   {
-    /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    // There was a problem detecting the BNO055.
+    Serial.print("Ooops, no BNO055 detected... Check your wiring or I2C ADDR!");
     while(1);
   }
 
@@ -32,18 +47,17 @@ void setup(void)
   delay(1000);
   
   bno.setExtCrystalUse(true);
-
-  Serial.println("Calibration status values: 0=uncalibrated, 3=fully calibrated");
 }
 
 void loop(void)
 {
   imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
 
+  // Reads potentiometer to determine offset for servo.
   potVal = analogRead(PIN_POT);
   potVal = map(potVal, 0, 1023, 0, 180);
   
-  // Maps yaw to servo position.
+  // Maps yaw to servo position inversely.
   yaw = euler.z();
   pos = map(yaw, 90, -90, potVal, 180);
   servo.write(pos);
@@ -52,10 +66,12 @@ void loop(void)
   Serial.print(" Z: ");
   Serial.print(yaw);
   Serial.print("\t\t");
+
+  // Display pos.
   Serial.print(" Pos: ");
   Serial.print(pos);
   Serial.print("\n");
 
-
+  // Delay 15 ms.
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
